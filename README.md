@@ -25,7 +25,6 @@ LearnQuest/
 │    └─ signup.css
 ├─ HTML/
 │    ├─ achivement.html
-│    ├─ aisuggestions.html
 │    ├─ leaderboard.html
 │    ├─ login.html
 │    ├─ quiz.html
@@ -41,9 +40,6 @@ LearnQuest/
 │    ├─ dash2.js
 │    ├─ dashboard.js
 │    └─ firbase-config.js
-├─ videos/
-│    ├─ code_overview.mp4
-│    └─ project_overview.mp4
 ├─ index.html
 └─ README.md
 ```

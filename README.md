@@ -50,11 +50,11 @@ LearnQuest/
 
 ## Video Walkthrough of the Project
 
-[▶️ Watch Project Walkthrough](videos/project_overview.mp4)
+[▶️ Watch Project Walkthrough](https://github.com/yashmolawade/LearnQuest/blob/main/videos/project_overview.mp4)
 
 ## Video Walkthrough of the Codebase
 
-[▶️ Watch Codebase Walkthrough](videos/code_overview.mp4)
+[▶️ Watch Codebase Walkthrough](https://github.com/yashmolawade/LearnQuest/blob/main/videos/code_overview.mp4)
 
 ## Features
 

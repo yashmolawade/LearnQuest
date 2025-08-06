@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(rgba(45, 45, 45, 0.8)),
+          url("/IMG/login_signup_background.png");
+        background-size: cover;
+      }
+      .quiz-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #cdccca;
+      }
+      .quiz-title {
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+      .quiz-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 1rem;
+        color: #030303;
+      }
+      .container {
+        max-width: 600px;
+        margin: 2rem auto;
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      #question {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+      }
+      .choice-container {
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+      }
+      .choice-container:hover {
+        background: #f1f1f1;
+      }
+      .choice-container.selected {
+        background: #e0f0ff;
+        border-color: #007bff;
+      }
+      .choice-container.correct {
+        background: #d4edda;
+        border-color: #28a745;
+        animation: correctPulse 0.3s ease;
+      }
+      .choice-container.wrong {
+        background: #f8d7da;
+        border-color: #dc3545;
+        animation: wrongShake 0.3s ease;
+      }
+      @keyframes correctPulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+      }
+      button {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        background: #d4af37;
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #a98408;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-header">
+      <div class="quiz-title">Quiz Time!</div>
+      <div class="quiz-meta">
+        <span id="category">Category:</span>
+        <span id="timer">30s</span>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="question">Loading...</div>
+      <div id="choices"></div>
+      <div class="nav-buttons">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+
+    <div id="scorecard"></div>
+
+    <script type="module">
+      import { db, auth } from "/JavaScript/firbase-config.js";
+      import {
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+      import {
+        doc,
+        collection,
+        updateDoc,
+        addDoc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+      document.addEventListener("DOMContentLoaded", async () => {
+        let uid = null;
+
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            uid = user.uid;
+            //console.log("Logged-in UID:", user.uid);
+            //console.log(uid)
+          }
+        });
+
+        window.nextQuestion = nextQuestion;
+        window.prevQuestion = prevQuestion;
+
+        const timerEl = document.getElementById("timer");
+        const questionEl = document.getElementById("question");
+        const choicesEl = document.getElementById("choices");
+        const categoryEl = document.getElementById("category");
+
+        let questions =
+          JSON.parse(localStorage.getItem("quizzQuestions")) || [];
+        localStorage.removeItem("quizzQuestions");
+        let currentQuestionIndex = 0;
+        let selectedAnswer = null;
+        let time = 30;
+        let timer;
+        let score = 0;
+        let goldbadge = 0;
+        let silverbadge = 0;
+        let bronzebadge = 0;
+        let trophycount = 0;
+        // Track answers
+        let userAnswers = Array(questions.length).fill(null);
+
+        // Shuffle the answers
+        function shuffle(array) {
+          return array.sort(() => Math.random() - 0.5);
+        }
+
+        // Start a single timer for the whole quiz
+        function startTimer() {
+          time = 30 * questions.length;
+          timerEl.textContent = `${time}s`;
+          clearInterval(timer);
+          timer = setInterval(() => {
+            time--;
+            timerEl.textContent = `${time}s`;
+            if (time <= 0) {
+              clearInterval(timer);
+              endQuiz();
+            }
+          }, 1000);
+        }
+
+        // Load the current question
+        function loadQuestion() {
+          const q = questions[currentQuestionIndex];
+          //  Load previous
+          const previousAnswer = userAnswers[currentQuestionIndex];
+          selectedAnswer = previousAnswer;
+
+          questionEl.innerHTML = q.question;
+          categoryEl.textContent = `Category: ${q.category}`;
+          const allChoices = shuffle([
+            ...q.incorrect_answers,
+            q.correct_answer,
+          ]);
+
+          choicesEl.innerHTML = "";
+          allChoices.forEach((choice) => {
+            const div = document.createElement("div");
+            div.className = "choice-container";
+            div.textContent = choice;
+
+            // If answered already, show feedback & disable clicks
+            if (previousAnswer !== null) {
+              if (choice === q.correct_answer) div.classList.add("correct");
+              if (choice === previousAnswer && choice !== q.correct_answer)
+                div.classList.add("wrong");
+              if (choice === previousAnswer) div.classList.add("selected");
+              div.onclick = null;
+            } else {
+              div.onclick = () => selectChoice(div, choice, q.correct_answer);
+            }
+
+            choicesEl.appendChild(div);
+          });
+        }
+
+        // Handle the choice selection
+        function selectChoice(div, choice, correct) {
+          if (userAnswers[currentQuestionIndex] !== null) return;
+          selectedAnswer = choice;
+          userAnswers[currentQuestionIndex] = choice;
+          document.querySelectorAll(".choice-container").forEach((c) => {
+            c.classList.remove("selected");
+          });
+          div.classList.add("selected");
+          showAnswer();
+          if (choice === correct) {
+            score += 10;
+          }
+        }
+
+        // Show the correct or wrong answer feedback
+        function showAnswer() {
+          const q = questions[currentQuestionIndex];
+          const correct = q.correct_answer;
+          document.querySelectorAll(".choice-container").forEach((c) => {
+            const text = c.textContent.trim();
+            if (text === correct) {
+              c.classList.add("correct");
+            } else if (text === selectedAnswer) {
+              c.classList.add("wrong");
+            }
+            c.onclick = null;
+          });
+        }
+
+        // Go to next question
+        function nextQuestion() {
+          if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+          } else {
+            endQuiz();
+          }
+        }
+
+        // Go to previous question
+        function prevQuestion() {
+          if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+          }
+        }
+
+        // End the quiz and show the scorecard
+        async function endQuiz() {
+          clearInterval(timer);
+          document.getElementById("scorecard").innerHTML = generateScoreCard();
+          document.querySelector(".container").style.display = "none";
+          if (uid) {
+            //console.log(uid)
+            const userRef = doc(db, "users", uid);
+            const userSnap = await getDoc(userRef);
+            //console.log(userSnap)
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+              console.log(userData);
+              let totalScore = (userData.points || 0) + score;
+              let gold = (userData.gold || 0) + goldbadge;
+              let silver = (userData.silver || 0) + silverbadge;
+              let bronze = (userData.bronze || 0) + bronzebadge;
+              let trophy = (userData.trophy || 0) + trophycount;
+
+              await updateDoc(userRef, {
+                points: totalScore,
+                gold: gold,
+                silver: silver,
+                bronze: bronze,
+                trophy: trophy,
+              });
+            }
+          }
+        }
+
+        // Generate the scorecard with badge and trophy
+        function generateScoreCard() {
+          const percent = (score / (questions.length * 10)) * 100;
+          let badge = "";
+          let trophy = "";
+
+          if (percent === 100) {
+            badge = "🏅 Gold Badge";
+            trophy = "🏆";
+            goldbadge = 1;
+            trophycount = 1;
+          } else if (percent >= 80) {
+            badge = "🥈 Silver Badge";
+            silverbadge = 1;
+          } else if (percent >= 50) {
+            badge = "🥉 Bronze Badge";
+            bronzebadge = 1;
+          } else {
+            badge = "😞 Better luck next time";
+          }
+
+          return `
+        <div class="container" style="text-align:center; padding: 2rem; font-family: sans-serif;">
+          <h1>🎉 Quiz Complete! 🎉</h1>
+          <h2>Score: ${score} / ${questions.length * 10}</h2>
+          <h3>Correct Answers: ${score / 10} / ${questions.length}</h3>
+          <h2>${badge}</h2>
+          <div style="font-size: 4rem;">${trophy}</div>
+          <br>
+          <button onclick="window.location.href='quiz.html'">Return to Home</button>
+          <canvas id="fireworks" style="position:fixed;top:0;left:0;z-index:-1;"></canvas>
+        </div>
+      `;
+        }
+
+        // Start the quiz
+        startTimer();
+        loadQuestion();
+      });
+    </script>
+  </body>
+</html>

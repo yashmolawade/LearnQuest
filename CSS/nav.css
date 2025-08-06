@@ -1,0 +1,191 @@
+*{
+    font-family: sans-serif;
+}
+body{
+    margin: 0;
+    padding: 0;
+    background-color: antiquewhite;
+}
+
+/* Main Navbar */
+.hidden {
+    display: none;
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color:#1b1919;
+    color: rgb(255, 249, 249);
+    height: 11vh;
+    position: relative;
+    z-index: 10;
+}
+
+/* LOGO area */
+.logo{
+    margin-left: 12px;
+}
+
+/* ul list */
+nav ul{
+    display: flex;
+    align-items: center;
+    list-style :none;
+    gap: 30px;
+    margin-right: 12px;
+}
+
+/* ul list anchor */
+nav ul a{
+    text-decoration: none;
+    color: white;
+    font-size:16px;
+}
+nav ul a:hover{
+    color:#D4af37;
+}
+
+/* Button */
+.login-btn{
+    box-sizing: border-box;
+    padding: 8px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.login-btn:hover{
+    background-color: #d4af37;
+}
+/* Profile */
+.profile .material-symbols-outlined{
+    display: none;
+    margin-left: -40px;
+    font-size:32px;
+    cursor: pointer;
+    position: relative;
+}
+.profile .material-symbols-outlined:hover{
+    color:#D4af37;
+}
+
+
+/* Icon */
+.icon{
+    margin-right: 12px;
+    display: none;
+}
+
+/* Profile Menu */
+.sub-menu-wrap{
+    color: black;
+    position: absolute;
+    top: 100%;
+    right: 1%;
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.5s;
+    z-index: 9999;
+}
+.sub-menu-wrap.open-menu{
+    max-height: 400px;
+    opacity: 1;
+    pointer-events: auto;
+}
+.sub-menu{
+    background:#D4af37;
+    pad: 20px;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
+    padding: 20px;
+    border-radius: 1rem;
+}
+.sub-menu hr{
+    border: 0;
+    height: 1px;
+    width: 100%;
+    background-color: black;
+    margin: 10px 0 10px 0;
+   
+
+}
+
+.logout-area{
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.logout-area>span:hover{
+    font-weight: 1000;
+}
+
+/* Responsive */
+@media (max-width:750px) {
+    nav ul{
+        display: none;
+    }
+    .icon{
+        margin-right: 12px;
+        display: inline;
+    }
+    .menus{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top:52px ;
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+        background-color: #2f3640;
+        padding: 0px;
+        padding: 20px 0px 20px 0px;
+    }
+}
+@media (max-width:800px) {
+    nav ul{
+        gap: 20px;
+    }
+}
+/* Responsive profile */
+@media (max-width: 750px) {
+    .sub-menu-wrap {
+      position: absolute;
+      top:200% ;
+      right: 40px;
+      left: 40px;
+      max-width: none;
+      border-radius: 12px;
+    color: black;
+     
+    }
+    .profile .material-symbols-outlined{
+        margin-left: 0px
+    }
+  
+    .sub-menu {
+      padding: 16px;
+      align-items: flex-start;
+    }
+  
+    .sub-menu hr {
+      background-color: white;
+    }
+  
+    .logout-area {
+      width: 100%;
+      justify-content: flex-start;
+      gap: 8px;
+      color: white;
+    }
+  
+    #log-email {
+      color: white;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+  }

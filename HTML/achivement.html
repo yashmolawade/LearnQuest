@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Achievement</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link rel="stylesheet" href="../CSS/nav.css" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: linear-gradient(
+            rgba(25, 25, 25, 0.85),
+            rgba(25, 25, 25, 0.85)
+          ),
+          url("/IMG/login_signup_background.png");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        font-family: sans-serif;
+      }
+      main {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 90vh;
+      }
+      hr {
+        border: 1.5px solid #d4af37;
+      }
+
+      .achievement-box {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem 3rem;
+        width: 400px;
+        max-width: 90%;
+        text-align: center;
+      }
+
+      .achievement-box h1 {
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        color: #333;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 0.75rem 0;
+        font-size: 1rem;
+        color: #444;
+      }
+
+      .badges {
+        margin-top: 1.5rem;
+      }
+
+      .badge {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f5f5f5;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+      }
+
+      .badge.gold {
+        border-left: 5px solid gold;
+      }
+      .badge.silver {
+        border-left: 5px solid silver;
+      }
+      .badge.bronze {
+        border-left: 5px solid #cd7f32;
+      }
+
+      .badge span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="logo">
+          <h1>LearnQuest</h1>
+        </div>
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li id="quiz-tab" class="hidden">
+            <a href="quiz.html">Quizzes</a>
+          </li>
+          <li id="achievement-tab" class="hidden">
+            <a href="achivement.html">Achivement</a>
+          </li>
+          <li id="leaderboard-tab" class="hidden">
+            <a href="leaderboard.html">Leaderboard</a>
+          </li>
+          <li>
+            <button onclick="loginpage()" id="login-btn" class="login-btn">
+              Login
+            </button>
+          </li>
+          <li id="pro" onclick="toggleProfile()" class="profile">
+            <span id="profile" class="material-symbols-outlined"
+              >account_circle</span
+            >
+          </li>
+        </ul>
+        <div class="icon" id="burger">
+          <span id="bar" class="material-symbols-outlined">menu</span>
+        </div>
+        <div class="sub-menu-wrap" id="submenu">
+          <div class="sub-menu">
+            <div><p id="log-email"></p></div>
+            <hr />
+            <div id="profile-logout" class="logout-area">
+              <span class="material-symbols-outlined">logout</span>Logout
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <div class="achievement-box">
+        <h1>🎖 Achievements</h1>
+        <hr />
+        <div class="info-row">
+          <span>Email:</span>
+          <span id="email">Loading...</span>
+        </div>
+        <div class="info-row">
+          <span>Points:</span>
+          <span id="points">-</span>
+        </div>
+        <div class="info-row">
+          <span>Level:</span>
+          <span id="level">-</span>
+        </div>
+        <div class="info-row">
+          <span>Trophies:</span>
+          <span id="trophy">-</span>
+        </div>
+
+        <div class="badges">
+          <div class="badge gold">
+            <span>🥇 Gold</span>
+            <span id="gold">0</span>
+          </div>
+          <div class="badge silver">
+            <span>🥈 Silver</span>
+            <span id="silver">0</span>
+          </div>
+          <div class="badge bronze">
+            <span>🥉 Bronze</span>
+            <span id="bronze">0</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+<script type="module">
+  import { db, auth } from "../JavaScript/firbase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import {
+    doc,
+    getDoc,
+  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const uid = user.uid;
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        document.getElementById("email").textContent = data.email;
+        document.getElementById("points").textContent = data.points ?? 0;
+        document.getElementById("level").textContent = data.level ?? 1;
+        document.getElementById("trophy").textContent = data.trophy ?? 0;
+        document.getElementById("gold").textContent = data.gold ?? 0;
+        document.getElementById("silver").textContent = data.silver ?? 0;
+        document.getElementById("bronze").textContent = data.bronze ?? 0;
+      }
+    } else {
+      //alert("Please log in to view your achievements.");
+      window.location.href = "HTML/login.html";
+    }
+  });
+</script>
+<script src="../JavaScript/dash2.js" type="module"></script>
+<script src="../JavaScript/dashboard.js"></script>

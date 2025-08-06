@@ -10,7 +10,7 @@ Frontend
 
 ## Deployed App
 
-- **Frontend:** https://deployed-site.whatever
+- **Frontend:** [Live Demo](https://learn-questt.netlify.app/)
 - **Backend:** N/A (uses Firebase and external APIs)
 - **Database:** Firebase Firestore
 
@@ -50,11 +50,11 @@ LearnQuest/
 
 ## Video Walkthrough of the Project
 
-[▶️ Watch Project Walkthrough](https://github.com/yashmolawade/LearnQuest/blob/main/videos/project_overview.mp4)
+[▶️ Watch Project Walkthrough](https://drive.google.com/file/d/1zOmYnTPbyBzGbwxJPNL9Hqo14UT325RP/view?usp=sharing)
 
 ## Video Walkthrough of the Codebase
 
-[▶️ Watch Codebase Walkthrough](https://github.com/yashmolawade/LearnQuest/blob/main/videos/code_overview.mp4)
+[▶️ Watch Codebase Walkthrough](https://drive.google.com/file/d/1QnJYVgZeAa2TZEKs1uZSEnPjDt-mhiAz/view?usp=sharing)
 
 ## Features
 
